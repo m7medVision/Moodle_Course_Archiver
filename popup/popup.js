@@ -23,24 +23,18 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (response.fileCount > 0) {
           statusMessage.textContent = `Moodle course detected with ${response.fileCount} files`;
+        } else {
+          statusMessage.textContent = "Moodle course detected (no files found)";
         }
+      } else {
+        statusMessage.textContent = "No Moodle course detected on this page";
       }
     });
   });
   
   // Archive button click handler
   archiveButton.addEventListener('click', () => {
-    // Add null checks to prevent the error
-    const includeFilesElement = document.getElementById('include-files');
-    const includeAssignmentsElement = document.getElementById('include-assignments');
-    const includeForumsElement = document.getElementById('include-forums');
-    
-    const options = {
-      includeFiles: includeFilesElement ? includeFilesElement.checked : true,
-      includeAssignments: includeAssignmentsElement ? includeAssignmentsElement.checked : true,
-      includeForums: includeForumsElement ? includeForumsElement.checked : true,
-      downloadMethod: 'zip'
-    };
+    const options = { downloadMethod: 'zip' };
     
     // Update status message
     statusMessage.textContent = "Creating archive... This may take a moment";

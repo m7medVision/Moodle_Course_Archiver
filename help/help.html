@@ -1,37 +1,132 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <!-- ...existing code... -->
+  <meta charset="UTF-8">
+  <title>Moodle Course Archiver - Help</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    h1 {
+      color: #1a73e8;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+    
+    h2 {
+      color: #333;
+      margin-top: 30px;
+    }
+    
+    .feature {
+      background-color: #f8f9fa;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 20px 0;
+    }
+    
+    .feature h3 {
+      margin-top: 0;
+      color: #1a73e8;
+    }
+    
+    ul {
+      padding-left: 20px;
+    }
+    
+    li {
+      margin-bottom: 8px;
+    }
+    
+    code {
+      background-color: #f1f3f4;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+    
+    .note {
+      background-color: #e8f0fe;
+      border-left: 4px solid #1a73e8;
+      padding: 10px 15px;
+      margin: 20px 0;
+    }
+    
+    .warning {
+      background-color: #fef7e0;
+      border-left: 4px solid #fbbc04;
+      padding: 10px 15px;
+      margin: 20px 0;
+    }
+  </style>
 </head>
 <body>
-    <h1>Moodle Course Archiver - Help</h1>
-    
-    <h2>Getting Started</h2>
-    <p>Moodle Course Archiver helps you save course content for offline reference.</p>
-    
-    <h2>How to use</h2>
-    <ol>
-        <li>Navigate to a Moodle course page</li>
-        <li>Click the Moodle Course Archiver extension icon</li>
-        <li>The extension will detect that you're on a Moodle course page</li>
-        <li>Choose between Archive (ZIP) or Direct Download methods:</li>
-        <ul>
-            <li><strong>Archive This Course</strong>: Creates a ZIP file containing all selected content</li>
-            <li><strong>Direct Download</strong>: Starts individual downloads for each file (similar to the console snippet)</li>
-        </ul>
-    </ol>
-
-    
-    <h2>Download Methods</h2>
+  <h1>Moodle Course Archiver Help</h1>
+  
+  <p>The Moodle Course Archiver extension helps you download files from Moodle learning management systems for offline access.</p>
+  
+  <div class="note">
+    <strong>Note:</strong> This extension only works on Moodle course pages.
+  </div>
+  
+  <h2>Features</h2>
+  
+  <div class="feature">
+    <h3>Archive as ZIP</h3>
+    <p>Creates a ZIP archive containing all downloadable files from the current course page. This is useful for:</p>
     <ul>
-        <li><strong>Archive (ZIP)</strong>: Collects all files into a single ZIP archive. Best for organizing content and reducing browser notifications.</li>
-        <li><strong>Direct Download</strong>: Downloads each file individually. Similar to the console script approach and useful if you prefer files to go directly to your downloads folder.</li>
+      <li>Keeping an organized backup of course materials</li>
+      <li>Saving all files in one click instead of downloading them individually</li>
+      <li>Maintaining the course structure for offline reference</li>
     </ul>
-    
-    <div class="tip">
-        <p><strong>Tip:</strong> For large courses with many files, the ZIP method may be more convenient to avoid browser download prompts for each file.</p>
-    </div>
-    
-    <!-- ...existing code... -->
+  </div>
+  
+  <div class="feature">
+    <h3>Download Files Directly</h3>
+    <p>Downloads all files individually without creating a ZIP archive. This is useful when:</p>
+    <ul>
+      <li>You want immediate access to individual files</li>
+      <li>You prefer to organize files yourself</li>
+      <li>You're on a system with limited space or memory</li>
+    </ul>
+  </div>
+  
+  <h2>How to Use</h2>
+  
+  <ol>
+    <li>Navigate to a Moodle course page</li>
+    <li>Click the extension icon in your browser toolbar</li>
+    <li>Select your preferred download method:
+      <ul>
+        <li><strong>Archive as ZIP</strong>: Creates a single ZIP file containing all course files</li>
+        <li><strong>Download Files Directly</strong>: Downloads each file individually</li>
+      </ul>
+    </li>
+    <li>Wait for the download process to complete</li>
+  </ol>
+  
+  <div class="warning">
+    <strong>Important:</strong> Some browsers may block multiple downloads. If prompted, allow the downloads to continue.
+  </div>
+  
+  <h2>Troubleshooting</h2>
+  
+  <h3>The extension doesn't detect my Moodle course</h3>
+  <p>Make sure you're on an actual course page in Moodle. The extension looks for specific Moodle course elements.</p>
+  
+  <h3>Downloads are blocked</h3>
+  <p>Your browser may block multiple downloads. Look for a notification in your browser and allow the downloads to continue.</p>
+  
+  <h3>No files are found</h3>
+  <p>The extension may not be able to detect files if your Moodle site uses a heavily customized theme or structure. Some Moodle installations use different CSS selectors for file links.</p>
+  
+  <h2>Privacy</h2>
+  
+  <p>This extension only interacts with the current page you're viewing and does not send any data to external servers. All processing happens locally in your browser.</p>
 </body>
 </html>

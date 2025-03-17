@@ -1,14 +1,14 @@
 {
   "manifest_version": 3,
-  "name": "Moodle Course Archiver",
+  "name": "Moodle Course File Downloader",
   "version": "1.0",
-  "description": "Archive your Moodle courses for offline access with a clean interface.",
+  "description": "Download Moodle course files easily",
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "downloads"
   ],
   "host_permissions": [
-    "*://*.moodle.org/*",
-    "*://*/*moodle*/*"
+    "*://*/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -23,8 +23,8 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://*.moodle.org/*", "*://*/*moodle*/*"],
-      "js": ["content/content.js"]
+      "matches": ["*://*/*"],
+      "js": ["libs/jszip.min.js", "content.js"]
     }
   ],
   "icons": {
