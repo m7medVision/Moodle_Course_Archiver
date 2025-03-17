@@ -37,22 +37,83 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 /**
+ * Extract file extension from various sources
+ */
+function getFileExtension(activityElement) {
+  let extension = '';
+  
+  // Try to get extension from accesshide span
+  const accesshideSpan = activityElement.querySelector('span.accesshide');
+  if (accesshideSpan) {
+    const spanText = accesshideSpan.textContent.trim();
+    if (spanText.includes('PDF')) extension = 'pdf';
+    else if (spanText.includes('PPT')) extension = 'ppt';
+    else if (spanText.includes('Word')) extension = 'doc';
+    else if (spanText.includes('Excel')) extension = 'xlsx';
+    else if (spanText.includes('Zip')) extension = 'zip';
+    else if (spanText.includes('Image')) extension = 'jpg';
+  }
+  
+  // If we couldn't determine from accesshide, check the activity icon
+  if (!extension) {
+    const iconImg = activityElement.querySelector('.activity-icon img, .activityiconcontainer img');
+    if (iconImg && iconImg.src) {
+      const src = iconImg.src;
+      // Extract file type from image URL
+      if (src.includes('/f/pdf')) extension = 'pdf';
+      else if (src.includes('/f/powerpoint')) extension = 'pptx';
+      else if (src.includes('/f/document')) extension = 'docx';
+      else if (src.includes('/f/spreadsheet')) extension = 'xlsx';
+      else if (src.includes('/f/archive')) extension = 'zip';
+      else if (src.includes('/f/image')) extension = 'jpg';
+      else if (src.includes('/f/text')) extension = 'txt';
+      else if (src.includes('/f/video')) extension = 'mp4';
+      else if (src.includes('/f/audio')) extension = 'mp3';
+    }
+  }
+  
+  return extension;
+}
+
+/**
  * Find all file links on the current page
  */
 function findFileLinks() {
   const fileLinks = [];
-  const activityLinks = document.querySelectorAll('div.activityname a.aalink.stretched-link');
+  const activityElements = document.querySelectorAll('div.activity-instance, div.activityname');
 
-  activityLinks.forEach(linkElement => {
+  activityElements.forEach(activityElement => {
+    const linkElement = activityElement.querySelector('a.aalink.stretched-link');
+    
+    if (!linkElement) return;
+    
     const href = linkElement.getAttribute('href');
     // Check if this link has the "File" indicator in an accesshide span
     const accesshideSpan = linkElement.querySelector('span.accesshide');
     const isFile = accesshideSpan && accesshideSpan.textContent.trim().includes('File');
     
     if (href && isFile) {
+      // Get the activity module element (parent of parent)
+      let moduleElement = activityElement;
+      while (moduleElement && !moduleElement.id.startsWith('module-')) {
+        moduleElement = moduleElement.parentElement;
+      }
+      
+      // Get file extension from various sources
+      const extension = moduleElement ? getFileExtension(moduleElement) : '';
+      
+      // Clean up the name and remove "File" text
+      let name = linkElement.textContent.trim().replace(/File/ig, '').trim();
+      
+      // Ensure name has the correct extension
+      if (extension && !name.toLowerCase().endsWith('.' + extension.toLowerCase())) {
+        name = name + '.' + extension;
+      }
+      
       fileLinks.push({
         url: href,
-        name: linkElement.textContent.trim().replace(/File/ig, '').trim()
+        name: name,
+        extension: extension
       });
     }
   });
@@ -76,7 +137,18 @@ function downloadFilesDirectly() {
   fileLinks.forEach(file => {
     const downloadLink = document.createElement('a');
     downloadLink.href = file.url;
-    downloadLink.download = file.url.substring(file.url.lastIndexOf('/') + 1);
+    
+    // Use file name with proper extension if available
+    if (file.name) {
+      downloadLink.download = file.name;
+    } else {
+      let filename = file.url.substring(file.url.lastIndexOf('/') + 1);
+      if (file.extension && !filename.toLowerCase().endsWith('.' + file.extension.toLowerCase())) {
+        filename += '.' + file.extension;
+      }
+      downloadLink.download = filename;
+    }
+    
     downloadLink.style.display = 'none';
     document.body.appendChild(downloadLink);
     downloadLink.click();
@@ -131,8 +203,18 @@ function processDownloadQueue(folder) {
     
     fetchFile(file.url)
       .then(data => {
-        // Get clean filename
-        let filename = file.url.substring(file.url.lastIndexOf('/') + 1);
+        // Get clean filename with proper extension
+        let filename;
+        if (file.name) {
+          filename = file.name;
+        } else {
+          filename = file.url.substring(file.url.lastIndexOf('/') + 1);
+          if (file.extension && !filename.toLowerCase().endsWith('.' + file.extension.toLowerCase())) {
+            filename += '.' + file.extension;
+          }
+        }
+        
+        // Sanitize filename for zip
         filename = filename.replace(/[^a-z0-9. _-]/gi, '_');
         
         // Add file to zip
@@ -171,6 +253,50 @@ function processDownloadQueue(folder) {
 }
 
 /**
+ * Detect file type from HTTP headers or URL
+ */
+function detectFileType(response, url) {
+  // Try to get content type from headers
+  const contentType = response.headers.get('Content-Type');
+  
+  if (contentType) {
+    if (contentType.includes('pdf')) return 'pdf';
+    if (contentType.includes('powerpoint') || contentType.includes('presentation')) return 'pptx';
+    if (contentType.includes('word') || contentType.includes('document')) return 'docx';
+    if (contentType.includes('excel') || contentType.includes('spreadsheet')) return 'xlsx';
+    if (contentType.includes('zip') || contentType.includes('archive')) return 'zip';
+    if (contentType.includes('image/jpeg')) return 'jpg';
+    if (contentType.includes('image/png')) return 'png';
+    if (contentType.includes('text/plain')) return 'txt';
+    if (contentType.includes('video')) return 'mp4';
+    if (contentType.includes('audio')) return 'mp3';
+  }
+  
+  // Try to extract extension from filename in Content-Disposition
+  const disposition = response.headers.get('Content-Disposition');
+  if (disposition && disposition.includes('filename=')) {
+    const filenameMatch = disposition.match(/filename=["']?([^"']+)["']?/);
+    if (filenameMatch && filenameMatch[1]) {
+      const parts = filenameMatch[1].split('.');
+      if (parts.length > 1) {
+        return parts[parts.length - 1].toLowerCase();
+      }
+    }
+  }
+  
+  // Try to extract extension from URL
+  const urlParts = url.split('.');
+  if (urlParts.length > 1) {
+    const potentialExt = urlParts[urlParts.length - 1].toLowerCase();
+    if (potentialExt.length < 5) {  // Most extensions are 2-4 characters
+      return potentialExt;
+    }
+  }
+  
+  return '';
+}
+
+/**
  * Fetch a file from a URL
  */
 function fetchFile(url) {
@@ -178,7 +304,13 @@ function fetchFile(url) {
     .then(response => {
       // If it's a direct file, return the blob
       if (!response.url.includes('mod/resource/view.php')) {
-        return response.blob();
+        // Get the file type
+        const fileType = detectFileType(response, response.url);
+        return response.blob().then(blob => {
+          // Tag the blob with the detected file type
+          blob.fileType = fileType;
+          return blob;
+        });
       }
       
       // If it's a resource view page, parse it to find the file link
@@ -188,7 +320,14 @@ function fetchFile(url) {
         const fileLink = doc.querySelector('.resourceworkaround a');
         
         if (fileLink) {
-          return fetch(fileLink.href).then(res => res.blob());
+          return fetch(fileLink.href).then(res => {
+            const fileType = detectFileType(res, fileLink.href);
+            return res.blob().then(blob => {
+              // Tag the blob with the detected file type
+              blob.fileType = fileType;
+              return blob;
+            });
+          });
         }
         
         // If we can't find a direct link, return the original response
