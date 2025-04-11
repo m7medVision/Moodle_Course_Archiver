@@ -3,6 +3,14 @@
 ## Overview
 A Chrome extension that helps you archive and manage your Moodle courses efficiently.
 
+## How to install?
+
+
+
+https://github.com/user-attachments/assets/944679e7-f474-4bee-a3f7-1c4370ea3b74
+
+
+
 ## Features
 - Archive Moodle courses with one click
 - Easy-to-use popup interface
