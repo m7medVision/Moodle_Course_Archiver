@@ -1,0 +1,33 @@
+name: Build Firefox Extension
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20' # Use a current LTS version
+
+    - name: Install web-ext
+      run: npm install --global web-ext
+
+    - name: Build the extension
+      # The source directory is the root in this case
+      run: web-ext build --source-dir ./ --artifacts-dir ./web-ext-artifacts
+
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: moodle-course-downloader-firefox
+        path: ./web-ext-artifacts/*.zip
